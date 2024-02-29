@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
-const userModel = require('./users')
+const userModel = require('./users');
+const session = require('express-session');
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('index', { title: 'Express' });
@@ -45,6 +46,22 @@ router.get('/delete', async function (req, res) {
   }
   res.send(DeleteUser)
 })
+
+
+
+// Sessions 
+router.get('/session', function (req, res) {
+  req.session.sessionName = true;
+  res.send("Session create hogya with sessionName and value GoTO /check")
+});
+// ye sirf mere browser me hua hai or isko dusre route me bhi access kr skte hai
+
+
+router.get('/check',function (req,res){
+  console.log(req.session);
+  res.send("check console")
+})
+
 
 
 
