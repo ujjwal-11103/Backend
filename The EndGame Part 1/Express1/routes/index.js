@@ -91,4 +91,19 @@ router.get('/delete', function (req, res) {
   res.send("Cookie deleted");
 })
 
+
+// FLASH MESSAGE  
+router.get('/flash', function (req, res) {
+  // req.flash("name",value)
+  req.flash("age", 21)
+  res.send("Flash message created")
+})
+
+router.get('/flashCheck', function (req, res) {
+  console.log(req.flash("age"));
+  res.send("check backend terminal")
+})
+
+
+
 module.exports = router;
