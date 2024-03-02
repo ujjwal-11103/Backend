@@ -1,13 +1,27 @@
 
 const mongoose = require('mongoose');
 
-mongoose.connect("mongodb://127.0.0.1:27017/testingDB");
+mongoose.connect("mongodb://127.0.0.1:27017/intermediateDB");
 
-const userschema = mongoose.Schema({
+const userData = mongoose.Schema({
+
   username: String,
-  password: Number,
-  age:Number
+
+  nickname: String,
+
+  description: String,
+
+  categories: {
+    type: Array,
+    default: []
+  },
+
+  datecreated: {
+    type: Date,
+    default: Date.now
+  }
+
 });
 
-module.exports = mongoose.model("user", userschema)
+module.exports = mongoose.model("users", userData)
 
