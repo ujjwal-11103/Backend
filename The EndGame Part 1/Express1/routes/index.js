@@ -3,98 +3,63 @@ var express = require('express');
 var router = express.Router();
 const userModel = require('./users');
 const session = require('express-session');
+const passport = require('passport')
+const localStrategy = require('passport-local');
+
+passport.use(new localStrategy(userModel.authenticate()));
+
+/* GET home page. */
 router.get('/', function (req, res) {
-
-  /* GET home page. */
-  res.render('index', { title: 'Express' });
+  res.render('index');
 });
 
-router.get('/create', async function (req, res) {
-  let userData1 = await userModel.create({
-    username: "soniye",
+router.get('/profile', isLoggedIn, function (req, res) {
+  res.render('./profile')
+});
 
-    nickname: "kurian",
-
-    description: " Hello i am soni",
-
-    categories: ['2', '3'],
-
+router.post('/register', function (req, res) {
+  var userData = new userModel({
+    username: req.body.username,
+    // password: req.body.password,
+    secret: req.body.secret
   })
-  res.send(userData1)
-});
+  userModel.register(userData, req.body.password)
+    .then(function (registereduser) {
+      passport.authenticate("local")(req, res, function () {
+        res.redirect('/profile');
+      })
+    })
+})
 
-// How can i perform a case-insensitive search in mongoose?
-// Ans:
-router.get('/find', async function (req, res) {
-
-
-  // let allData = await userModel.find({      //idhr soni ka i capital hai that is why not showiing anything on the output 
-  //   username:"sonI"                        //islie isse bachne ke liye regex ka use hota hai
-  // })
-  let regex = new RegExp("^SoNi$", "i")
-  let allData = await userModel.find({          // ^ shuruaat me 
-    username: regex                             // $ end me 
-  })                                            // isse ye hota hai ki capital letter wala issue solve hojayega
-  res.send(allData)
-});
+router.post('/login', passport.authenticate('local', {
+  successRedirect: "/profile",
+  failureRedirect: "/"
+}), function (req, res) { })
 
 
-// how do i find document where an array field contains all of a set of values ?
-// Ans :
+// router.get('/logout', function (err) {
+//   if (err) { return next(err); }
+//   res.redirect('/')
+// })
 
-router.get('/findCat', async function (req, res) {
-
-  let allData = await userModel.find({
-    categories: { $all: ['1', '2'] }
-  })
-  res.send(allData)
-
-});
-
-// How can i find the document with a sepcific date range?
-// Ans :
-
-router.get('/findDate', async function (req, res) {
-  var date1 = new Date('2024-03-01')
-  var date2 = new Date('2024-03-02')
-
-  let allData = await userModel.find({
-    datecreated: { $gte: date1, $lte: date2 }
-  })
-  res.send(allData)
-
-});
-
-// How can i filter document based on the existence(presence) of a field in Mangoose?
-// Ans:
-
-router.get('/findPre', async function (req, res) {
-
-  let allData = await userModel.find({ categories: { $exists: true } })
-  res.send(allData)
-
-});
-
-
-// How can i filter a document based on specific field's length
-// Ans :
-
-router.get('/findLength', async function (req, res) {
-
-  let allData = await userModel.find({
-    $expr: {
-      $and: [
-        { $gte: [{ $strLenCP: '$nickname' }, 1] },
-        { $lte: [{ $strLenCP: '$nickname' }, 8] }
-      ]
+router.get('/logout', function (req, res) {
+  req.logout(function (err) {
+    if (err) {
+      // Handle error
+      console.error(err);
     }
-  })
-  res.send(allData)
-
+    res.redirect('/');
+  });
 });
 
 
 
 
+function isLoggedIn(req, res, next) {
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  res.redirect('/');
+}
 
 module.exports = router;
